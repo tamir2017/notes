@@ -1,0 +1,34 @@
+目录
+1.简介
+2.数据结构
+3.原理及协议
+4.功能
+5.应用
+==============
+1.简介
+	Zookeeper是一个分布式协调服务；它是为用户的分布式应用程序提供协调服务。它本身就一个集群（集群数量为奇数，至少为三台），集群的角色：Leader 和  follower  （Observer）
+只要集群中有半数以上节点存活，集群就能提供服务。
+
+2.数据结构
+	层次化的目录结构，命名符合常规文件系统规范，每个节点在zookeeper中叫做znode,并且其有一个唯一的路径标识，节点Znode可以包含数据和子节点，客户端应用可以在节点上设置监视器。
+	Znode有两种类型：短暂（ephemeral）（断开连接自己删除），持久（persistent）（断开连接不删除）。Znode有四种形式的目录节点（默认是persistent ）PERSISTENT、PERSISTENT_SEQUENTIAL（持久序列/test0000000019）、EPHEMERAL、EPHEMERAL_SEQUENTIAL。
+	创建znode时设置顺序标识，znode名称后会附加一个值，顺序号是一个单调递增的计数器，由父节点维护。在分布式系统中，顺序号可以被用于为所有的事件进行全局排序，这样客户端可以通过顺序号推断事件的顺序。
+
+3.原理及协议
+	Zookeeper虽然在配置文件中并没有指定master和slave，但是zookeeper工作时，是有一个节点为leader，其他则为follower。Leader是通过内部的选举机制临时产生的。
+	选举机制是zab协议
+	ZooKeeper为高可用的一致性协调框架，自然的ZooKeeper也有着一致性算法的实现，ZooKeeper使用的是ZAB协议作为数据一致性的算法，ZAB（ZooKeeper Atomic Broadcast ）全称为：原子消息广播协议；ZAB可以说是在Paxos算法基础上进行了扩展改造而来的，ZAB协议设计了支持崩溃恢复，ZooKeeper使用单一主进程Leader用于处理客户端所有事务请求，采用ZAB协议将服务器数状态以事务形式广播到所有Follower上；由于事务间可能存在着依赖关系，ZAB协议保证Leader广播的变更序列被顺序的处理，：一个状态被处理那么它所依赖的状态也已经提前被处理；ZAB协议支持的崩溃恢复可以保证在Leader进程崩溃的时候可以重新选出Leader并且保证数据的完整性；
+　　在ZooKeeper中所有的事务请求都由一个主服务器也就是Leader来处理，其他服务器为Follower，Leader将客户端的事务请求转换为事务Proposal，并且将Proposal分发给集群中其他所有的Follower，然后Leader等待Follwer反馈，当有过半数（>=N/2+1）的Follower反馈信息后，Leader将再次向集群内Follower广播Commit信息，Commit为将之前的Proposal提交。
+
+
+4.功能
+	Zookeeper所提供的服务涵盖：主从协调、服务器节点动态上下线、统一配置管理、分布式共享锁、统一名称服务……
+	虽然说可以提供各种服务，但是zookeeper在底层其实只提供了两个功能：
+		管理(存储，读取)用户程序提交的数据；
+		并为用户程序提供数据节点监听服务；
+5.应用
+	实现分布式应用的(主节点HA)及客户端动态更新主节点状态
+	分布式共享锁的简单实现
+	配置文件管理-solrcloud
+	统一命名服务-dubbo
+	

@@ -3,7 +3,11 @@ hsdf配置文件中slaves文件是为了在namenode端使用ssh命令方便启�
 使用hadoop-daemon.sh start datanode 命令启动即可，不一定将新数据节点加入slaves中，不加入该文件时，启动时需要手动开启而已。手动开启新的数据节点，
 此时namenode节点会接收到新datanode发来的信息，namenode端可以增加子节点datanode的数量，进而完成扩容。
 当集群中需要减少数据节点时，方法可以是关闭需要关闭的子节点，使用命令为hadoop-daemon.sh stop datanode即可，此时，namenode端不是马上了解有
-datanode关闭，其等待的是时间为namenode向datanode发送的心跳时间，默认是10分钟30秒，当然该数值可以设置。
+datanode关闭，其等待的是时间为datanode向namenode发送的心跳时间，默认是10分钟30秒，当然该数值可以设置。
 
 2.hdfs-可容错性-----
 hsdf的配置文件中信息时可以备份的，其默认是3.当datanode只用1，或者2个时，待存储的数据无法存储3份，当datanode大于3个时，待存储的数据可以存储3份。
+-setrep                
+功能：设置hdfs中文件的副本数量
+示例：hadoop fs -setrep 3 /aaa/jdk.tar.gz
+<这里设置的副本数只是记录在namenode的元数据中，是否真的会有这么多副本，还得看datanode的数量>

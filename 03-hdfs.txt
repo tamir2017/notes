@@ -11,3 +11,41 @@ hsdf的配置文件中信息时可以备份的，其默认是3.当datanode只用
 功能：设置hdfs中文件的副本数量
 示例：hadoop fs -setrep 3 /aaa/jdk.tar.gz
 <这里设置的副本数只是记录在namenode的元数据中，是否真的会有这么多副本，还得看datanode的数量>
+
+3.初始化工作目录结构-----
+hdfs namenode -format 只是初始化了namenode的工作目录
+而datanode的工作目录是在datanode启动后自己初始化的
+
+4.datanode不被namenode识别的问题-----
+namenode在format初始化的时候会形成两个标识：
+blockPoolId：
+clusterId：
+新的datanode加入时，会获取这两个标识作为自己工作目录中的标识。
+一旦namenode重新format后，namenode的身份标识已变，而datanode如果依然持有原来的id，就不会被namenode识别。
+处理方法：删除新的datanode原来的工作目录。
+
+namenode 中工作目录信息
+--namespaceID=938760833
+--clusterID=CID-87c90a30-8f95-4e53-91d9-42f1e821216d
+--cTime=0
+--storageType=NAME_NODE
+--blockpoolID=BP-1669085547-192.168.2.201-1552724672244
+--layoutVersion=-60
+
+datanode 中工作目录信息
+--storageID=DS-45ae0807-6728-4fe3-88cf-c09cc8eb1539
+--clusterID=CID-87c90a30-8f95-4e53-91d9-42f1e821216d
+--cTime=0
+--datanodeUuid=ad2d665d-865f-4e5f-bb97-8ea33a7800f9
+--storageType=DATA_NODE
+--layoutVersion=-56
+--namespaceID=938760833
+--cTime=0
+--blockpoolID=BP-1669085547-192.168.2.201-1552724672244
+
+
+5.datanode下线后多久看到效果-----
+datanode不是一下线就会被namenode认定为下线的，有一个超时时间。
+
+6.关于副本数量的问题-----
+副本数由客户端的参数dfs.replication决定（优先级： conf.set >  自定义配置文件 > jar包中的hdfs-default.xml）
